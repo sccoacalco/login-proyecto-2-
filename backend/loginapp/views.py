@@ -1,19 +1,18 @@
-from django.contrib.auth import authenticate
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+import os
+from django.views.generic import View
+from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 
-@csrf_exempt
+class FrontendAppView(View):
+    def get(self, request, *args, **kwargs):
+        try:
+            with open(os.path.join(settings.BASE_DIR, 'frontend', 'build', 'index.html')) as f:
+                return HttpResponse(f.read())
+        except FileNotFoundError:
+            return HttpResponse(
+                "React build not found. Please build your React app first.",
+                status=501,
+            )
+
 def login_view(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        username = data.get('username')
-        password = data.get('password')
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            return JsonResponse({'status': 'ok'})
-        else:
-            return JsonResponse({'status': 'fail'}, status=401)
-    else:
-        # Respuesta para métodos que no sean POST
-        return JsonResponse({'message': 'Usa método POST para iniciar sesión'}, status=405)
+    return JsonResponse({"message": "login_view funcionando"})
